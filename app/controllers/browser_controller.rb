@@ -1,8 +1,16 @@
 class BrowserController < ApplicationController
 
+  require 'skimfy'
+  include SkimfyCore
+
   def browse
 
-    @page = ''
+    session[:link] = params[:link]
+
+    if session[:link]
+      s = Skimfy.new(session[:link])
+      @page = s.page
+    end
 
   end
 

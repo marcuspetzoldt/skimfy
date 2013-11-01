@@ -1,8 +1,8 @@
-<div class="container">
+<div class="container" style="background-color: #fafafa">
   <%= form_tag root_path do %>
     <div class="logo">Sk&#305;<span class="idot">*</span>mfy</div>
     <div class="browser">
-      <%= text_field_tag :link %>
+      <%= text_field_tag :link, session[:link]%>
       <%= button_tag t('go'), class: 'btn' %>
     </div>
   <% end %>

@@ -1,6 +1,7 @@
 Skimfy::Application.routes.draw do
 
   root 'browser#browse'
+  post '/', to: 'browser#browse'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
