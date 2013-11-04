@@ -18,7 +18,7 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql:skimfy_development</jdbc-url>
       <user-name>postgres</user-name>
-      <user-password>dfcfdfe3dfc1dfcedfeddfd9dfd8df84dfe4dfcedffadf84df9fdf9ddfd9</user-password>
+      <user-password>dfdadfe3dfc7dfd0dfe1dfcbdfdddf84dffddfccdfcfdff9df84df9fdf9cdfd9</user-password>
       <libraries>
         <library>
           <url>file://$USER_HOME$/.RubyMine50/config/jdbc-drivers/postgresql-driver-license.txt</url>
