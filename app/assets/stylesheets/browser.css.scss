@@ -68,16 +68,36 @@ img {
   padding-top: 8px;
 }
 
-*[data-del] {
-  border: solid red 1px;
-//  background-color: #ffcccc;
-//  display: none;
+/*
+*[data-cc="0"],
+*[data-cc="1"],
+*[data-cc="2"],
+*[data-cc="3"],
+*[data-cc="4"],
+*[data-cc="5"] {
+  background-color: #ffb0b0;
 }
+
+*[data-cc="6"],
+*[data-cc="7"],
+*[data-cc="8"],
+*[data-cc="9"] {
+  background-color: #ffffd0;
+}
+
+*[data-cc="10"],
+*[data-cc="11"],
+*[data-cc="12"],
+*[data-cc="13"],
+*[data-cc="14"],
+*[data-cc="15"] {
+  background-color: #d0ffd0;
+}
+*/
 
 .logo {
   float: left;
   text-shadow: 1px 1px 0px #ffffff;
-  margin-top: 4px;
   vertical-align: middle;
   margin-bottom: 10px;
   font-size: 24px;
@@ -88,7 +108,7 @@ img {
     font-size: 120%;
     margin-left: -17px;
     margin-right: -3px;
-    top: 10px;
+    top: 8px;
     color: red;
   }
 }

@@ -4,8 +4,13 @@ module SkimfyCore
   require 'open-uri'
   require 'openssl'
   require 'net/http'
+  require 'fastimage'
 
   class Skimfy
+
+    # Viscosity
+    MU = 1.5
+    CUTOFF = 11
 
     def page=(b)
       @page = b
@@ -25,8 +30,7 @@ module SkimfyCore
       begin
         @page = Nokogiri::HTML(open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE))
         skim
-        reformat
-      rescue Exception => e
+      rescue Errno::ENOENT, URI::InvalidURIError => e
         case rescues
           when 0
             # Try to reload the page with explicit HTTP://
@@ -41,66 +45,50 @@ module SkimfyCore
             rescues = 2
             retry
         end
+      rescue OpenURI::HTTPError
         # Everything failed. Lets see why.
-        @page = Nokogiri::HTML("<body><div class=\"container\">#{e.message.html_safe}</div></body>")
+        @page = Nokogiri::HTML("<div class=\"container\">#{e.message.html_safe}</div>")
       end
 
     end
 
     private
-      def reformat
-        @page.xpath('//body').children.each do |node|
-          node.set_attribute('class', 'container')
-        end
-      end
-
       def skim
-        remove_by_xpath('//script')
-        remove_by_xpath('//object')
-        remove_by_xpath('//noscript')
-        remove_by_xpath('//noframes')
-        remove_by_xpath('//applet')
-        remove_by_xpath('//meta')
-        remove_by_xpath('//link')
-        remove_by_xpath('//iframe')
-        remove_by_xpath('//style')
-        remove_by_xpath('//base')
-        remove_by_xpath('//basefont')
-        remove_by_xpath('//font')
-        remove_by_xpath('//form')
-        remove_by_xpath('//frameset')
-        remove_by_xpath('//frame')
-        remove_by_xpath('//comment()')
-        remove_by_xpath('//nav')
+        body = @page.xpath('//body')
+        body[0]['class'] = 'container'
 
-        strip_attributes(@page)
-        relink
-        character_count = analyze(@page)
-        keep(@page.xpath('//body'), character_count)
-        remove_by_xpath('//*[@data-del=1]')
+        body.xpath('//script').remove
+        body.xpath('//object').remove
+        body.xpath('//noscript').remove
+        body.xpath('//noframes').remove
+        body.xpath('//applet').remove
+        body.xpath('//meta').remove
+        body.xpath('//link').remove
+        body.xpath('//iframe').remove
+        body.xpath('//style').remove
+        body.xpath('//base').remove
+        body.xpath('//basefont').remove
+        body.xpath('//font').remove
+        body.xpath('//form').remove
+        body.xpath('//frameset').remove
+        body.xpath('//frame').remove
+        body.xpath('//comment()').remove
+        body.xpath('//nav').remove
+
+        strip_attributes(body)
+        flatten(body, 0)
+        analyze(body)
+        attract(body)
+        maximum = max(body)
+        normalize(body, maximum)
+        cleanup(body)
+        remove_images(body)
+        relink(body)
       end
 
-      def keep(node, count)
-        iteration = node.children
-        cutoff = (1.0 / iteration.count) * 0.1
-        iteration.each do |n|
-          if n['data-cc'] == '0.0'
-            n['data-del'] = '1'
-          else
-            unless (n.description && n.description.inline?)
-              if (n['data-cc'].to_f / count) < cutoff
-                n['data-del'] = '1'
-              else
-                keep(n, n['data-cc'].to_f)
-              end
-            end
-          end
-        end
-      end
-
-      def remove_by_xpath(xpath)
-        if xpath
-          @page.xpath(xpath).each do |n|
+      def cleanup(node)
+        node.children.each do |n|
+          if n['data-cc'] && n['data-cc'].to_i < CUTOFF
             n.remove
           end
         end
@@ -128,8 +116,19 @@ module SkimfyCore
         end
       end
 
-      def relink
-        @page.xpath('//a').each do |n|
+      def remove_images(node)
+        node.xpath('//img').each do |n|
+          if n['src'][0..4] == 'http:'
+            size = FastImage.size(n['src'])
+            if size && size[0] < 300 && size[1] < 300
+              n.remove
+            end
+          end
+        end
+      end
+
+      def relink(node)
+        node.xpath('//a').each do |n|
           if n['href'] =~ /^[a-zA-z]*:\/\//
             n['href'] = "/?link=#{n['href']}"
           else
@@ -151,27 +150,81 @@ module SkimfyCore
         end
       end
 
+      def flatten(node, depth)
+        blockless = ''
+        node.children.each do |n|
+          if n.text? || (n.description && n.description.inline?)
+            blockless << n.to_s.chomp.strip
+            n.remove
+          else
+            unless blockless == ''
+              n.before("<#{n.parent.name}>#{blockless}</#{n.parent.name}>")
+              blockless = ''
+            end
+            flatten(n, 1)
+          end
+        end
+        if depth == 1
+          unless blockless == ''
+            node.add_child("<#{node.name}>#{blockless}</#{node.name}>")
+          end
+          case node.name
+          when 'ol', 'ul', 'dl', 'dir', 'menu', 'table', 'tr', 'tbody', 'thead', 'tfoot'
+            # ignore
+          else
+            node.before(node.children)
+            node.remove
+          end
+        end
+      end
+
+      def max(node)
+        maximum = 0
+        node.children.each do |n|
+          m = max(n)
+          if n['data-cc']
+            weight = n['data-cc'].to_f
+            m = m > weight ? m : weight
+          end
+          maximum = m > maximum ? m : maximum
+        end
+        maximum
+      end
+
+      def normalize(node, norm)
+        node.children.each do |n|
+          if n['data-cc']
+            x = n['data-cc'].to_f + n['data-gr'].to_f
+            x = ((x / norm) * 15).to_i
+            n['data-cc'] = x > 15 ? '15' : x.to_s
+          else
+            n['data-cc'] = n.parent['data-cc']
+          end
+          normalize(n, norm)
+        end
+      end
+
       def analyze(node)
-        char_weight = 0
+        total_weight = 0
         node.children.each do |n|
           # count characters in the node
-          l = n.xpath('text()').text.strip.length
+          l = n.xpath('text()').inner_text.strip.length
           factor = 1.0
 
           # weigh tags
           case n.name
           when 'h1'
-            factor = 14.0
-          when 'h2'
-            factor = 12.0
-          when 'h3'
-            factor = 10.0
-          when 'h4'
-            factor = 8.0
-          when 'h5'
             factor = 6.0
-          when 'h6', 'p', 'cite', 'code', 'em', 'strong', 'samp', 'pre', 'blockquote'
+          when 'h2'
+            factor = 5.0
+          when 'h3'
             factor = 4.0
+          when 'h4'
+            factor = 3.0
+          when 'h5'
+            factor = 2.0
+          when 'h6', 'p', 'cite', 'code', 'em', 'strong', 'samp', 'pre', 'blockquote'
+            factor = 2.0
           when 'b', 'i', 'u'
             factor = 2.0
           when 'ul', 'ol', 'dl', 'dir', 'menu'
@@ -186,12 +239,41 @@ module SkimfyCore
           when 'img'
             l = 0.01
           end
-          l_upstream = analyze(n)
-          l = (l + l_upstream) * factor
-          n['data-cc'] = l.to_f
-          char_weight = char_weight + l
+          weight = l.to_f * factor
+          upstream_weight = analyze(n) * factor
+          n['data-gr'] = '0.0'
+          n['data-cc'] = weight + upstream_weight
+          total_weight = total_weight + weight + upstream_weight
         end
-        return char_weight
+        total_weight
       end
+
+      def attract(node)
+        node.children.each do |n|
+          if n['data-cc']
+            w = n['data-cc'].to_f
+            sibling = n
+            loop do
+              sibling = sibling.next_sibling
+              if sibling && sibling['data-cc']
+                w = w / MU
+                sibling['data-gr'] = sibling['data-gr'].to_f + w
+              end
+              break unless w > 0 && sibling
+            end
+            w = n['data-cc'].to_f
+            sibling = n
+            loop do
+              sibling = sibling.previous_sibling
+              if sibling && sibling['data-cc']
+                w = w / MU
+                sibling['data-gr'] = sibling['data-gr'].to_f + w
+              end
+              break unless w > 0 && sibling
+            end
+          end
+        end
+      end
+
   end
 end
