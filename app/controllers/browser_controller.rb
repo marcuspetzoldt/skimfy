@@ -9,7 +9,8 @@ class BrowserController < ApplicationController
 
     if session[:link]
       s = Skimfy.new(session[:link])
-      @page = s.page
+      @body = s.body
+      @encoding = s.encoding
     end
 
   end

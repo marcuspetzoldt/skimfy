@@ -17,7 +17,15 @@ module SkimfyCore
     end
 
     def page
+      @page
+    end
+
+    def body
       @page.xpath('//body').children
+    end
+
+    def encoding
+      @page.meta_encoding || 'utf-8'
     end
 
     def initialize(filename)
@@ -55,7 +63,6 @@ module SkimfyCore
     private
       def skim
         body = @page.xpath('//body')
-        body[0]['class'] = 'container'
 
         body.xpath('//script').remove
         body.xpath('//object').remove
@@ -122,6 +129,10 @@ module SkimfyCore
             size = FastImage.size(n['src'])
             if size && size[0] < 300 && size[1] < 300
               n.remove
+            else
+              if size[0] > 450
+                n['width'] = '450px'
+              end
             end
           end
         end
@@ -154,10 +165,10 @@ module SkimfyCore
         blockless = ''
         node.children.each do |n|
           if n.text? || (n.description && n.description.inline?)
-            blockless << n.to_s.chomp.strip
+            blockless << n.to_s.chomp.gsub(/  */, ' ')
             n.remove
           else
-            unless blockless == ''
+            unless blockless.strip == ''
               n.before("<#{n.parent.name}>#{blockless}</#{n.parent.name}>")
               blockless = ''
             end
@@ -165,7 +176,7 @@ module SkimfyCore
           end
         end
         if depth == 1
-          unless blockless == ''
+          unless blockless.strip == ''
             node.add_child("<#{node.name}>#{blockless}</#{node.name}>")
           end
           case node.name
