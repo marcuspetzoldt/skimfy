@@ -1,8 +1,6 @@
 <%= provide :encoding, @encoding %>
 <% if @body %>
-  <% b = @body.to_s %>
-  <% Rails.logger.info("Encoding: #{b.encoding}") %>
-  <%= render inline: b %>
+  <%= render inline: @body.to_s %>
 <% else %>
   <h2 style="text-align: center"><%= t('title') %></h2>
   <p><%= raw(t('blurb')) %></p>
