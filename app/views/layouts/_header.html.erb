@@ -2,7 +2,7 @@
   <%= form_tag root_path do %>
     <div class="logo">Sk&#305;<span class="idot">*</span>mfy</div>
     <div class="browser">
-      <%= text_field_tag :link, session[:link], style: "background-image:url(#{url_for('assets/globe.png')}); background-repeat: no-repeat; background-position: 2px 3px", id: 'link' %>
+      <%= text_field_tag :link, session[:link], style: "background-image:url(#{asset_path('globe.png')}); background-repeat: no-repeat; background-position: 2px 3px", id: 'link' %>
       <%= button_tag t('go'), class: 'btn' %>
     </div>
   <% end %>
