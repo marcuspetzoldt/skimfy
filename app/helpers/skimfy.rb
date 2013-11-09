@@ -38,6 +38,9 @@ module SkimfyCore
 
       begin
         @page = Nokogiri::HTML(open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE))
+        if @page.encoding.nil?
+          @page.encoding = 'utf-8'
+        end
         skim
       rescue Errno::ENOENT, URI::InvalidURIError => e
         case rescues
