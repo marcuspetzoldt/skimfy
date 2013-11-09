@@ -37,10 +37,8 @@ module SkimfyCore
       @baseurl = filename.last == '/' ? filename[0..-2] : filename
 
       begin
-        @page = Nokogiri::HTML(open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE))
-        if @page.encoding.nil?
-          @page.encoding = 'utf-8'
-        end
+        html = open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+        @page = Nokogiri::HTML(html.read, nil, 'utf-8')
         skim
       rescue Errno::ENOENT, URI::InvalidURIError => e
         case rescues
@@ -84,7 +82,17 @@ module SkimfyCore
         body.xpath('//frameset').remove
         body.xpath('//frame').remove
         body.xpath('//comment()').remove
+        body.xpath('//param').remove
+        body.xpath('//video').remove
+        body.xpath('//audio').remove
+        body.xpath('//source').remove
+        body.xpath('//track').remove
+        body.xpath('//canvas').remove
+        body.xpath('//map').remove
+        body.xpath('//area').remove
         body.xpath('//nav').remove
+        body.xpath('//svg').remove
+        body.xpath('//math').remove
 
         strip_attributes(body)
         flatten(body, 0)
@@ -110,7 +118,7 @@ module SkimfyCore
           strip_attributes n
           n.attributes.each do |key, value|
             case key
-              when 'href', 'src', 'value'
+              when 'href', 'src'
                 # Keep these attributes
               when 'style'
                 # Remove hidden/invisible nodes
@@ -129,14 +137,13 @@ module SkimfyCore
 
       def remove_images(node)
         node.xpath('//img').each do |n|
-          if n['src'][0..4] == 'http:'
-            size = FastImage.size(n['src'])
-            if size && size[0] < 300 && size[1] < 300
-              n.remove
-            else
-              if size[0] > 450
-                n['width'] = '450px'
-              end
+          n['src'] = (n['src'].first == '/' ? "#{@baseurl}#{n['src']}" : "#{@baseurl}/#{n['src']}") unless n['src'] =~ /^[a-zA-z]*:\/\//
+          size = FastImage.size(n['src'])
+          if size.nil? || (size[0] < 300 && size[1] < 300)
+            n.remove
+          else
+            if size[0] > 450
+              n['width'] = '450px'
             end
           end
         end
@@ -193,12 +200,18 @@ module SkimfyCore
         end
       end
 
+      # find the node with highest ranking
+      # remove nodes with a ranking of 0
       def max(node)
         maximum = 0
         node.children.each do |n|
           m = max(n)
           if n['data-cc']
             weight = n['data-cc'].to_f
+            if weight == 0.0
+              n.remove
+              next
+            end
             m = m > weight ? m : weight
           end
           maximum = m > maximum ? m : maximum
@@ -238,7 +251,7 @@ module SkimfyCore
             factor = 3.0
           when 'h5'
             factor = 2.0
-          when 'h6', 'p', 'cite', 'code', 'em', 'strong', 'samp', 'pre', 'blockquote'
+          when 'h6', 'p', 'cite', 'code', 'em', 'strong', 'samp', 'pre', 'blockquote', 'main'
             factor = 2.0
           when 'b', 'i', 'u'
             factor = 2.0
