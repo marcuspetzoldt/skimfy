@@ -37,7 +37,11 @@ module SkimfyCore
       @baseurl = filename.last == '/' ? filename[0..-2] : filename
 
       begin
-        @page = Nokogiri::HTML(open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE).read, nil, 'UTF-8')
+        http = open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE).read
+        Rails.logger.info("open-uri encoding: #{http.encoding}")
+        http.force_encoding('utf-8')
+        @page = Nokogiri::HTML(http, nil, 'UTF-8')
+
         skim
       rescue Errno::ENOENT, URI::InvalidURIError => e
         case rescues
