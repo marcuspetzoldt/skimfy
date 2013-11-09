@@ -7,7 +7,7 @@ class BrowserController < ApplicationController
 
     session[:link] = params[:link]
 
-    if session[:link]
+    unless session[:link].blank?
       s = Skimfy.new(session[:link])
       @body = s.body
       @encoding = s.encoding
