@@ -37,8 +37,7 @@ module SkimfyCore
       @baseurl = filename.last == '/' ? filename[0..-2] : filename
 
       begin
-        html = open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-        @page = Nokogiri::HTML(html.read, nil, 'utf-8')
+        @page = Nokogiri::HTML(open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE).read, nil, 'UTF-8')
         skim
       rescue Errno::ENOENT, URI::InvalidURIError => e
         case rescues
@@ -142,8 +141,8 @@ module SkimfyCore
           if size.nil? || (size[0] < 300 && size[1] < 300)
             n.remove
           else
-            if size[0] > 450
-              n['width'] = '450px'
+            if size[0] > 422
+              n['width'] = '422px'
             end
           end
         end
