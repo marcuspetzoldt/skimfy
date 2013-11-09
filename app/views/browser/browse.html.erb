@@ -1,6 +1,6 @@
 <%= provide :encoding, @encoding %>
 <% if @body %>
-  <%= render inline: @body.to_xhtml %>
+  <%= render inline: @body.to_s.encode(@encoding) %>
 <% else %>
   <h2 style="text-align: center"><%= t('title') %></h2>
   <p><%= raw(t('blurb')) %></p>
