@@ -29,6 +29,14 @@ module SkimfyCore
       @page.meta_encoding || 'utf-8'
     end
 
+    def baseurl
+      @baseurl
+    end
+
+    def title
+      @page.xpath('//title/text()')
+    end
+
     def initialize(filename)
 
       return if filename.blank?
@@ -38,7 +46,7 @@ module SkimfyCore
 
       begin
         http = open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE).read
-        http.force_encoding('ISO-8859-1')
+        http.force_encoding('BINARY')
 #       http.encode!('utf-8')
         @page = Nokogiri::HTML(http) #, nil, 'UTF-8')
         skim
@@ -67,11 +75,16 @@ module SkimfyCore
     private
       def skim
         body = @page.xpath('//body')
+        if body.empty?
+          body = @page.xpath('//frameset')
+          unless body.empty?
+            body[0].name = 'body'
+          end
+        end
 
         body.xpath('//script').remove
         body.xpath('//object').remove
         body.xpath('//noscript').remove
-        body.xpath('//noframes').remove
         body.xpath('//applet').remove
         body.xpath('//meta').remove
         body.xpath('//link').remove
@@ -81,8 +94,6 @@ module SkimfyCore
         body.xpath('//basefont').remove
         body.xpath('//font').remove
         body.xpath('//form').remove
-        body.xpath('//frameset').remove
-        body.xpath('//frame').remove
         body.xpath('//comment()').remove
         body.xpath('//param').remove
         body.xpath('//video').remove
@@ -95,6 +106,8 @@ module SkimfyCore
         body.xpath('//nav').remove
         body.xpath('//svg').remove
         body.xpath('//math').remove
+        body.xpath('//br').remove
+        body.xpath('//hr').remove
 
         strip_attributes(body)
         flatten(body, 0)
@@ -193,7 +206,7 @@ module SkimfyCore
             node.add_child("<#{node.name}>#{blockless}</#{node.name}>")
           end
           case node.name
-          when 'ol', 'ul', 'dl', 'dir', 'menu', 'table', 'tr', 'tbody', 'thead', 'tfoot'
+          when 'ol', 'ul', 'dl', 'dir', 'menu', 'table', 'tr', 'tbody', 'thead', 'tfoot', 'frame'
             # ignore
           else
             node.before(node.children)
@@ -268,6 +281,13 @@ module SkimfyCore
             end
           when 'img'
             l = 0.01
+          when 'frame'
+            n.name = 'a'
+            n['href'] = n['src']
+            n['style'] = 'display: block'
+            n.remove_attribute('src')
+            n.content = n['href']
+            l = 100
           end
           weight = l.to_f * factor
           upstream_weight = analyze(n) * factor

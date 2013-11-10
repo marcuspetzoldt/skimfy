@@ -1,7 +1,14 @@
 <%= provide :encoding, @encoding %>
 <% if @body %>
+  <div style="float:left"><%= link_to 'Original', @baseurl %></div>
+  <div style="float:right"><%= link_to @site, "http://#{@site}" %></div>
+  <div style="clear: both; margin-bottom: 40px"></div>
+  <h1><%= @title %></h1>
+  <hr>
   <%= render inline: @body.to_s %>
 <% else %>
   <h2 style="text-align: center"><%= t('title') %></h2>
   <p><%= raw(t('blurb')) %></p>
+  <p><%= raw(t('bookmarklet')) %></p>
+  <div style="text-align: center"><a href="javascript:window.location.href='http://localhost:3000/?link='+window.location.href">Skimfy It</a></div>
 <% end %>
