@@ -1,4 +1,5 @@
-== README
+== Readme
+=== Skimfy
 
-Try to extract content in readable form from any website.
+*Skify* tries to serve a readable version of any website. Distracting and irrelevant content will be removed.
 
