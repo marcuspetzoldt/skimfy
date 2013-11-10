@@ -6,6 +6,7 @@ class BrowserController < ApplicationController
   def browse
 
     # Skimfy can not skimfy itself
+    params[:link] = '' if params[:link].nil?
     session[:link] = params[:link].index(request.host) ? '' : params[:link]
 
     unless session[:link].blank?

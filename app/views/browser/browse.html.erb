@@ -10,5 +10,5 @@
   <h2 style="text-align: center"><%= t('title') %></h2>
   <p><%= raw(t('blurb')) %></p>
   <p><%= raw(t('bookmarklet')) %></p>
-  <div style="text-align: center"><a href="javascript:window.location.href='http://localhost:3000/?link='+window.location.href">Skimfy It</a></div>
+  <div style="text-align: center"><a href="javascript:window.location.href='http://<%= request.host %>:<%= request.port %>/?link='+window.location.href">Skimfy It</a></div>
 <% end %>
