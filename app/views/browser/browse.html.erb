@@ -3,11 +3,11 @@
   <div style="float:left"><%= link_to 'Original', @baseurl %></div>
   <div style="float:right"><%= link_to @site, "http://#{@site}" %></div>
   <div style="clear: both; margin-bottom: 40px"></div>
+  <hr>
   <h1><%= @title %></h1>
   <hr>
   <%= render inline: @body.to_s %>
 <% else %>
-  <% Rails.logger.info("Language: #{request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first}") %>
   <% if request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first == 'de' %>
     <h2 style="text-align: center; color: #a0a0a0">&ldquo;Auf den Punkt kommen - sofort!&rdquo;</h2>
     <div style="float: left; width: 450px">

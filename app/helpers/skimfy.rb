@@ -120,6 +120,7 @@ module SkimfyCore
         cleanup(body)
         remove_images(body)
         relink(body)
+        strip_attributes(body)
       end
 
       def cleanup(node)
@@ -135,7 +136,7 @@ module SkimfyCore
           strip_attributes n
           n.attributes.each do |key, value|
             case key
-              when 'href', 'src'
+              when 'href', 'src', 'width'
                 # Keep these attributes
               when 'style'
                 # Remove hidden/invisible nodes

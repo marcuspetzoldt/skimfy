@@ -1,6 +1,8 @@
 <div class="container" style="background-color: #fafafa">
   <%= form_tag root_path do %>
+    <%= link_to root_path do %>
     <div class="logo">Sk&#305;<span class="idot">*</span>mfy</div>
+    <% end %>
     <div class="browser">
       <%= text_field_tag :link, session[:link], style: "background-image:url(#{asset_path('globe.png')}); background-repeat: no-repeat; background-position: 2px 3px", id: 'link' %>
       <%= button_tag t('go'), class: 'btn' %>

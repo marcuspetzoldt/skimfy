@@ -65,6 +65,9 @@ a {
     color: #005580;
     text-decoration: underline;
   }
+  .logo {
+    color: black;
+  }
 }
 
 code,
@@ -77,6 +80,20 @@ pre {
   overflow: scroll;
 }
 
+hr {
+  border: 0;
+  height: 1px;
+  background-image: -webkit-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
+  background-image:    -moz-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
+  background-image:     -ms-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
+  background-image:      -o-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
+}
+
+hr + h1 {
+  padding-left: 60px;
+  padding-right: 60px;
+}
+
 img {
   clear: both;
   float: left;
@@ -84,33 +101,6 @@ img {
   padding-bottom: 8px;
   padding-top: 8px;
 }
-
-/*
-*[data-cc="0"],
-*[data-cc="1"],
-*[data-cc="2"],
-*[data-cc="3"],
-*[data-cc="4"],
-*[data-cc="5"] {
-  background-color: #ffb0b0;
-}
-
-*[data-cc="6"],
-*[data-cc="7"],
-*[data-cc="8"],
-*[data-cc="9"] {
-  background-color: #ffffd0;
-}
-
-*[data-cc="10"],
-*[data-cc="11"],
-*[data-cc="12"],
-*[data-cc="13"],
-*[data-cc="14"],
-*[data-cc="15"] {
-  background-color: #d0ffd0;
-}
-*/
 
 .logo {
   float: left;
@@ -190,5 +180,4 @@ img {
   padding-top: 8px;
   padding-left: 48px;
   padding-right: 48px;
-  padding-bottom: 64px;
 }
