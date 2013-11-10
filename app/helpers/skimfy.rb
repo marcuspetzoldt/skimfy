@@ -46,7 +46,9 @@ module SkimfyCore
 
       begin
         http = open(filename, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE).read
-        http.force_encoding('BINARY')
+        if Rails.env.production?
+          http.force_encoding('ISO-8859-1')
+        end
 #       http.encode!('utf-8')
         @page = Nokogiri::HTML(http) #, nil, 'UTF-8')
         skim

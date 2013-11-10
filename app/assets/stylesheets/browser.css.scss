@@ -67,6 +67,16 @@ a {
   }
 }
 
+code,
+pre {
+  background-color: #fafafa;
+  border: solid black 1px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  overflow: scroll;
+}
+
 img {
   clear: both;
   float: left;
@@ -158,6 +168,16 @@ img {
     border-image: none;
     border-radius: 4px 4px 4px 4px;
     box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.bookmarklet {
+  cursor: move;
+  line-height: 30px;
+  font-size: 24px;
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
 }
 
 .container {

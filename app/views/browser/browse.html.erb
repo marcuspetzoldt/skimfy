@@ -7,8 +7,29 @@
   <hr>
   <%= render inline: @body.to_s %>
 <% else %>
-  <h2 style="text-align: center"><%= t('title') %></h2>
-  <p><%= raw(t('blurb')) %></p>
-  <p><%= raw(t('bookmarklet')) %></p>
-  <div style="text-align: center"><a href="javascript:window.location.href='http://<%= request.host %>:<%= request.port %>/?link='+window.location.href">Skimfy It</a></div>
+  <% Rails.logger.info("Language: #{request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first}") %>
+  <% if request.env['HTTP_ACCEPT_LANGUAGE'].scan(/^[a-z]{2}/).first == 'de' %>
+    <h2 style="text-align: center; color: #a0a0a0">&ldquo;Auf den Punkt kommen - sofort!&rdquo;</h2>
+    <div style="float: left; width: 450px">
+      <p><strong>Skimfy</strong> versucht eine lesbare Version jeder beliebigen Webseite anzuzeigen. Ablenkender und irrelevanter Inhalt wird entfernt. Einfach einen Link in das Eingabefeld oben eintippen, und auf &ldquo;Los!&rdquo; klicken.</p>
+      <p>Ohne Installation, ohne Registrierung, ohne Cookies, und natürlich ganz ohne Kosten.</p>
+    </div>
+    <div style="float: right; width: 450px">
+      <p><strong>Skimfy</strong> ist noch praktischer mit dem Bookmarklet.</p>
+      <p>Den Button in die Favoriten ziehen, und fortan jede Seite mit einem Klick skimfyzieren.</p>
+      <div style="text-align: center; padding-top: 2ex;"><a class="btn bookmarklet" href="javascript:window.location.href='http://<%= request.host %>:<%= request.port %>/?link='+window.location.href">Skimfy It</a></div>
+    </div>
+  <% else %>
+    <h2 style="text-align: center; color: #a0a0a0">&ldquo;Get to the things that matter - fast!&rdquo;</h2>
+    <div style="float: left; width: 450px">
+      <p><strong>Skimfy</strong> tries to serve a readable version of any website. Distracting and irrelevant content will be removed. Just type a link into the text field above and hit &ldquo;Go!&rdquo;.</p>
+      <p>No installation, no registration, no cookies, and of course absolutely free.</p>
+    </div>
+    <div style="float: right; width: 450px">
+      <p><strong>Skimfy</strong> is even more convenient with the bookmarklet.</p>
+      <p>Drag the button into your favorites, and skimfy any website with one click.</p>
+      <div style="text-align: center; padding-top: 2ex;"><a class="btn bookmarklet" href="javascript:window.location.href='http://<%= request.host %>:<%= request.port %>/?link='+window.location.href">Skimfy It</a></div>
+    </div>
+  <% end %>
+  <div style="clear: both"></div>
 <% end %>
